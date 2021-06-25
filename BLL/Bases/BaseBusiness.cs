@@ -13,16 +13,14 @@ namespace BLL.Bases
     public abstract class BaseBusiness<TEntity> : IBusiness<TEntity>
         where TEntity : BaseEntity, IEntity
     {
-        protected readonly IRepositoryWrapper _repositoryWrapper;
         protected readonly IRepository<TEntity> _repository;
         //protected readonly ILogger _logger;
 
-        protected BaseBusiness(IRepositoryWrapper repositoryWrapper
+        protected BaseBusiness(IRepository<TEntity> repository
             //, ILogger<BaseBusiness<TEntity>> logger
             )
         {
-            this._repositoryWrapper = repositoryWrapper;
-            this._repository = _repositoryWrapper.PropertyFindValue(typeof(IRepository<TEntity>)) as IRepository<TEntity>;
+            this._repository = repository;
             //this._logger = logger;
         }
 
