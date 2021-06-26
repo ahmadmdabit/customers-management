@@ -34,11 +34,11 @@ namespace API.Controllers
             entities = await this._business.GetBy("UserCode", userCode, this._ip).ConfigureAwait(false);
             if (entities?.Count > 0)
             {
-                return Ok(new ApiResult<UserTable>(true, 3, null));
+                return Ok(new ApiResult<UserTable>(false, 3, new ErrorResult(404, "UserPass Error!")));
             }
             else
             {
-                return Ok(new ApiResult<UserTable>(true, 1, null));
+                return Ok(new ApiResult<UserTable>(false, 1, new ErrorResult(404, "UserCode Not Found!")));
             }
         }
     }
