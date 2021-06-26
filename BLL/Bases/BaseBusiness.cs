@@ -88,6 +88,11 @@ namespace BLL.Bases
             return await this._repository.GetBy(condition).ConfigureAwait(false);
         }
 
+        public async Task<List<TEntity>> GetBy(Expression<Func<TEntity, bool>> condition, string ip = "")
+        {
+            return await this._repository.GetBy(condition).ConfigureAwait(false);
+        }
+
         public virtual async Task<TEntity> Update(TEntity entity, string ip = "")
         {
             return await this._repository.Update(entity).ConfigureAwait(false);

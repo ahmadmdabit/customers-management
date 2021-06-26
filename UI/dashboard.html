@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Dashboard | Customer Management</title>
+
+    <script src="/assets/vendors/js-cookie/js.cookie.min.js"></script>
+    <script>
+        if (Cookies.get('uc') == undefined && Cookies.get('uc') == null) {
+            window.location.href = '/index.html'
+        }
+    </script>
+
+    <link href="/assets/vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/vendors/tabulator/css/tabulator_modern.min.css" rel="stylesheet">
+    <link href="/assets/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column h-100">
+
+    <header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Customer Management</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Customers</a>
+                        </li>
+                    </ul>
+                </div>
+                <a class="btn btn-danger" href="javascript:signout()">(<span id="userCode"></span>) Signout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Begin page content -->
+    <main class="flex-shrink-0">
+        <div class="container">
+
+            <a class="btn btn-success" href="javascript:showModal()">Yeni Ekle</a>
+
+            <div id="customers"></div>
+
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">All Rights Reserved © 2021 Customer Management</span>
+        </div>
+    </footer>
+
+
+    <script src="/assets/vendors/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/assets/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/vendors/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="/assets/vendors/tabulator/js/tabulator.min.js"></script>
+    <script>
+        var config;
+        $(function () {
+            $('#userCode').text(Cookies.get('uc'));
+            $.get('/config.json', function (res) {
+                config = res
+
+                // Loading data
+                var table = new Tabulator("#customers", {
+                    ajaxURL: config.apiBaseUrl + 'api/customerTable/byUser/' + Cookies.get('uc'), //ajax URL
+                    ajaxConfig: "GET", //ajax HTTP request type
+                    ajaxContentType: "json", // send parameters to the server as a JSON encoded string
+                    ajaxResponse: function (url, params, response) {
+                        //url - the URL of the request
+                        //params - the parameters passed with the request
+                        //response - the JSON object returned in the body of the response.
+
+                        return response.data; //return the tableData property of a response json object
+                    },
+                    height: 470, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                    layout: "fitColumns", //fit columns to width of table (optional)
+                    columns: [ //Define Table Columns
+                        { title: "Code", field: "customerCode" },
+                        { title: "Name", field: "customerName" },
+                        { title: "City", field: "customerCity" },
+                    ],
+                    rowDblClick: function (e, row) {
+                        //e - the click event object
+                        //row - row component
+                        console.log(row._row.data);
+                        showModal(row._row.data);
+                    },
+                });
+            });
+
+        });
+
+        function showModal(customer) {
+            var type = 1; // Update
+            if (customer == undefined || customer == null) {
+                type = 0; // Insert
+                customer = {
+                    "customerCode": "",
+                    "customerName": "",
+                    "customerCity": "",
+                };
+            }
+
+            Swal.fire({
+                title: '<strong>Müşteri Bilgileri</strong>',
+                icon: 'info',
+                html:
+                    `
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="code" placeholder="Code" value="${customer.customerCode}" required>
+                        <label for="code">Code</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="name" placeholder="Name" value="${customer.customerName}" required>
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="city" placeholder="City" value="${customer.customerCity}" required>
+                        <label for="city">City</label>
+                    </div>
+                    `,
+                showCancelButton: true,
+                cancelButtonText: 'Vazgeç',
+                focusConfirm: false,
+                confirmButtonText: 'Müşteri Bilgileri Güncelle',
+                showDenyButton: true,
+                denyButtonText: `Müşteri Sil`,
+            })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        customerProcess(customer, type);
+                    } else if (result.isDenied) {
+                        customerProcess(customer, 2); // Delete
+                    }
+                });
+        }
+
+        function customerProcess(customer, type) {
+            var message;
+            switch (type) {
+                case 0: message = "Yeni Müşteri Ekleme Olacak, emin misiniz?"; break;
+                case 1: message = "Müşteri Bilgileri Güncelleme Olacak, emin misiniz?"; break;
+                case 2: message = "Müşteri Bilgileri Tamamen Silinecek, emin misiniz?"; break;
+                default:
+                    break;
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Uyari',
+                text: message,
+                showCancelButton: true,
+                confirmButtonText: `Evet`,
+                cancelButtonText: `Vazgeç`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: config.apiBaseUrl + 'api/customerTable/customerProcess',
+                        data: JSON.stringify({ 
+                            "Customer": customer, 
+                            "type": type, 
+                            "Filter": null,
+                        }),
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'İşlem Başarılı',
+                                    // text: 'Giriş Yapldı',
+                                    // footer: '<a href="">Why do I have this issue?</a>'
+                                });
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2000);
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'HATA!',
+                                    text: res.error.errorMessage,
+                                    // footer: '<a href="">Why do I have this issue?</a>'
+                                });
+                            }
+                        },
+                        error: function (e) {
+                            console.error(e);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'HATA!',
+                                text: 'Lütfen konsolu açın.',
+                                // footer: '<a href="">Why do I have this issue?</a>'
+                            });
+                        },
+                        dataType: "json",
+                        contentType: "application/json"
+                    });
+                }
+            });
+        }
+
+        function signout() {
+            Swal.fire({
+                title: 'Oturumu kapattığınızdan emin misiniz?',
+                showCancelButton: true,
+                confirmButtonText: `Evet`,
+                cancelButtonText: `Vazgeç`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'İşlem Başarılı',
+                        text: 'Çıkış Yapldı',
+                        // footer: '<a href="">Why do I have this issue?</a>'
+                    });
+                    Cookies.remove('uc');
+                    setTimeout(() => {
+                        window.location.href = '/index.html'
+                    }, 2000);
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

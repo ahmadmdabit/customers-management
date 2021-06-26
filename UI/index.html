@@ -5,7 +5,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
-    <title>Signin</title>
+    <title>Signin | Customer Management</title>
+
+    <script src="/assets/vendors/js-cookie/js.cookie.min.js"></script>
+    <script>
+        if (Cookies.get('uc') != undefined && Cookies.get('uc') != null) {
+            window.location.href = '/dashboard.html'
+        }
+    </script>
 
     <link href="/assets/vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/css/signin.css" rel="stylesheet">
@@ -33,6 +40,7 @@
     </main>
 
     <script src="/assets/vendors/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/assets/vendors/sweetalert2/sweetalert2.all.min.js"></script>
     <script>
         var config;
         $(function(){
@@ -48,12 +56,36 @@
             $.ajax({
                 type: "POST",
                 url: config.apiBaseUrl+'api/userTable/userCheck',
-                data: JSON.stringify({ "UserCode": $('#floatingInput').val(), "UserPass": $('#floatingPassword').val(), "UserName": null, "UserFilter": null,  }), 
+                data: JSON.stringify({ "UserCode": $('#floatingInput').val(), "UserPass": $('#floatingPassword').val(), "UserName": null, "UserFilter": null, }), 
                 success: function(res) {
-                    console.log(res);
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'İşlem Başarılı',
+                            text: 'Giriş Yapldı',
+                            // footer: '<a href="">Why do I have this issue?</a>'
+                        });
+                        Cookies.set('uc', $('#floatingInput').val(), { expires: 1 });
+                        setTimeout(() => {
+                            window.location.href = '/dashboard.html'
+                        }, 2000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'HATA!',
+                            text: res.error.errorMessage,
+                            // footer: '<a href="">Why do I have this issue?</a>'
+                        });
+                    }
                 },
                 error: function(e) {
-                    alert(e);
+                    console.error(e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'HATA!',
+                        text: 'Lütfen konsolu açın.',
+                        // footer: '<a href="">Why do I have this issue?</a>'
+                    });
                 },
                 dataType: "json",
                 contentType : "application/json"

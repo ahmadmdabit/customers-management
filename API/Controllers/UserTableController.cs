@@ -5,6 +5,7 @@ using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace API.Controllers
         [HttpPost("userCheck")]
         public virtual async Task<ActionResult<ApiResult<UserTable>>> UserCheck([FromBody] UserTable userTable)
         {
-            this._logger.LogInformation($"[userCheck/{userTable.UserCode}/{userTable.UserPass}] [{this._ip}]");
+            this._logger.LogInformation($"[userCheck] [{this._ip}] {JsonConvert.SerializeObject(userTable)}");
             var entities = await this._business.GetBy("UserCode", userTable.UserCode, "UserPass", userTable.UserPass, this._ip).ConfigureAwait(false);
             if (entities?.Count > 0)
             {
