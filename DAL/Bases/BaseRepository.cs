@@ -24,13 +24,13 @@ namespace DAL.Bases
 
         public async Task<TEntity> Add(TEntity entity)
         {
-            entity.CreatedDate = DateTime.Now;
+            //entity.CreatedDate = DateTime.Now;
             this._context.Set<TEntity>().Add(entity);
             await this._context.SaveChangesAsync().ConfigureAwait(false);
             return entity;
         }
 
-        public async Task<TEntity> Delete(long id)
+        public async Task<TEntity> Delete(string id)
         {
             var entity = await this._context.Set<TEntity>().FindAsync(id).ConfigureAwait(false);
             if (entity == null)
@@ -65,11 +65,11 @@ namespace DAL.Bases
             return await this._context.Set<TEntity>().FromSqlRaw(sql, parameters).ToListAsync().ConfigureAwait(false);
         }
 
-        public async Task<TEntity> Get(long id)
+        public async Task<TEntity> Get(string id)
         {
             IQueryable<TEntity> dbSet = IncludeBuild();
             return await dbSet.AsNoTracking().AsAsyncEnumerable()
-                .FirstOrDefaultAsync(x => Convert.ToInt64(x.GetKeyProperty()) == id).ConfigureAwait(false);
+                .FirstOrDefaultAsync(x => x.GetKeyProperty().ToString() == id).ConfigureAwait(false);
 
             //var entityFound = await this._context.Set<TEntity>().FindAsync(id).ConfigureAwait(false);
             //this._context.Entry(entityFound).State = EntityState.Detached;

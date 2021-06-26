@@ -9,8 +9,8 @@ namespace DAL.Bases
 {
     public abstract class BaseEntity : IEntity
     {
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
+        //public DateTime? CreatedDate { get; set; }
+        //public DateTime? UpdatedDate { get; set; }
 
         public object GetKeyProperty()
         {

@@ -29,7 +29,7 @@ namespace BLL.Bases
             return await this._repository.Add(entity).ConfigureAwait(false);
         }
 
-        public virtual async Task<TEntity> Delete(long id, string ip = "")
+        public virtual async Task<TEntity> Delete(string id, string ip = "")
         {
             return await this._repository.Delete(id).ConfigureAwait(false);
         }
@@ -39,7 +39,7 @@ namespace BLL.Bases
             return await this._repository.DeleteRange(entities).ConfigureAwait(false);
         }
 
-        public async Task<TEntity> Get(long id, string ip = "")
+        public async Task<TEntity> Get(string id, string ip = "")
         {
             return await this._repository.Get(id).ConfigureAwait(false);
         }
@@ -88,7 +88,7 @@ namespace BLL.Bases
             return await this._repository.GetBy(condition).ConfigureAwait(false);
         }
 
-        public virtual async Task<TEntity> Update(long id, TEntity entity, string ip = "")
+        public virtual async Task<TEntity> Update(TEntity entity, string ip = "")
         {
             return await this._repository.Update(entity).ConfigureAwait(false);
         }

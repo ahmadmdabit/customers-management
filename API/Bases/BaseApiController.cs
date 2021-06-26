@@ -12,7 +12,7 @@ using DAL.Bases;
 using DAL.Interfaces;
 using API.Concrets;
 
-namespace ApiLayerLibrary.Bases
+namespace API.Bases
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -21,16 +21,14 @@ namespace ApiLayerLibrary.Bases
     public abstract class BaseApiController<TEntity> : ControllerBase, IController<TEntity>
         where TEntity : BaseEntity, IEntity
     {
-        protected readonly IBusinessWrapper _businessWrapper;
         protected readonly IBusiness<TEntity> _business;
         protected readonly ILogger _logger;
         protected readonly IActionContextAccessor _accessor;
         protected readonly string _ip;
 
-        protected BaseApiController(IBusinessWrapper businessWrapper, ILogger<BaseApiController<TEntity>> logger, IActionContextAccessor accessor)
+        protected BaseApiController(IBusiness<TEntity> business, ILogger<BaseApiController<TEntity>> logger, IActionContextAccessor accessor)
         {
-            this._businessWrapper = businessWrapper;
-            this._business = this._businessWrapper.PropertyFindValue(typeof(IBusiness<TEntity>)) as IBusiness<TEntity>;
+            this._business = business;
             this._logger = logger;
             this._accessor = accessor;
             this._ip = this._accessor.ActionContext.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -38,7 +36,7 @@ namespace ApiLayerLibrary.Bases
 
         // DELETE: api/[controller]/5
         [HttpDelete("{id}")]
-        public virtual async Task<ActionResult<ApiResult<TEntity>>> Delete(long id)
+        public virtual async Task<ActionResult<ApiResult<TEntity>>> Delete(string id)
         {
             this._logger.LogInformation($"[Delete:{id}] [{this._ip}]");
             var entity = await this._business.Delete(id, this._ip).ConfigureAwait(false);
@@ -72,7 +70,7 @@ namespace ApiLayerLibrary.Bases
 
         // GET: api/[controller]/5
         [HttpGet("{id}")]
-        public virtual async Task<ActionResult<ApiResult<TEntity>>> Get(long id)
+        public virtual async Task<ActionResult<ApiResult<TEntity>>> Get(string id)
         {
             this._logger.LogInformation($"[Get:{id}] [{this._ip}]");
             var entity = await this._business.Get(id, this._ip).ConfigureAwait(false);
@@ -118,10 +116,10 @@ namespace ApiLayerLibrary.Bases
 
         // PUT: api/[controller]/5
         [HttpPut("{id}")]
-        public virtual async Task<ActionResult<ApiResult<TEntity>>> Put(long id, [FromBody]TEntity entity)
+        public virtual async Task<ActionResult<ApiResult<TEntity>>> Put([FromBody]TEntity entity)
         {
-            this._logger.LogInformation($"[Put:{id}] [{this._ip}] {JsonConvert.SerializeObject(entity)}");
-            var businessEntity = await this._business.Update(id, entity, this._ip).ConfigureAwait(false);
+            this._logger.LogInformation($"[Put] [{this._ip}] {JsonConvert.SerializeObject(entity)}");
+            var businessEntity = await this._business.Update(entity, this._ip).ConfigureAwait(false);
             if (businessEntity != null)
             {
                 return Ok(new ApiResult<TEntity>(true, businessEntity, null));

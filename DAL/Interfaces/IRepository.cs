@@ -24,7 +24,7 @@ namespace DAL.Interfaces
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns>A Task of TEntity.</returns>
-        Task<TEntity> Delete(long id);
+        Task<TEntity> Delete(string id);
 
         /// <summary>
         /// Deletes range of TEntityEntities
@@ -46,7 +46,7 @@ namespace DAL.Interfaces
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns>A Task of TEntity.</returns>
-        Task<TEntity> Get(long id);
+        Task<TEntity> Get(string id);
 
         /// <summary>
         /// Gets the all.

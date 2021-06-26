@@ -10,11 +10,11 @@ namespace BLL.Interfaces
     {
         Task<TEntity> Add(TEntity entity, string ip = "");
 
-        Task<TEntity> Delete(long id, string ip = "");
+        Task<TEntity> Delete(string id, string ip = "");
 
         Task<List<TEntity>> DeleteRange(List<TEntity> entities, string ip = "");
 
-        Task<TEntity> Get(long id, string ip = "");
+        Task<TEntity> Get(string id, string ip = "");
 
         Task<List<TEntity>> GetAll(string ip = "");
 
@@ -22,6 +22,6 @@ namespace BLL.Interfaces
 
         Task<List<TEntity>> GetBy(string property1Name, string property1Value, string property2Name, string property2Value, string ip = "");
 
-        Task<TEntity> Update(long id, TEntity entity, string ip = "");
+        Task<TEntity> Update(TEntity entity, string ip = "");
     }
 }
