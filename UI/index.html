@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Signin</title>
+
+    <link href="/assets/vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/signin.css" rel="stylesheet">
+
+</head>
+
+<body class="text-center">
+
+    <main class="form-signin">
+        <form>
+            <img class="mb-4" src="/assets/vendors/bootstrap/img/bootstrap-logo.svg" alt="" width="72" height="57">
+            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInput" placeholder="User Code" required>
+                <label for="floatingInput">User Code</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="floatingPassword" placeholder="User Password" required>
+                <label for="floatingPassword">User Password</label>
+            </div>
+
+            <a class="w-100 btn btn-lg btn-primary" href="javascript:signin()">Sign in</a>
+        </form>
+    </main>
+
+    <script src="/assets/vendors/jquery/jquery-3.6.0.min.js"></script>
+    <script>
+        var config;
+        $(function(){
+            $.get('/config.json', function(res) {config = res});
+
+        });
+
+        function signin() {
+            if ($('#floatingInput').val() == null || $('#floatingPassword').val() == null) {
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: config.apiBaseUrl+'api/userTable/userCheck',
+                data: JSON.stringify({ "UserCode": $('#floatingInput').val(), "UserPass": $('#floatingPassword').val(), "UserName": null, "UserFilter": null,  }), 
+                success: function(res) {
+                    console.log(res);
+                },
+                error: function(e) {
+                    alert(e);
+                },
+                dataType: "json",
+                contentType : "application/json"
+            });
+        }
+    </script>
+</body>
+
+</html>

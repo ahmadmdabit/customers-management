@@ -21,17 +21,17 @@ namespace API.Controllers
         {
         }
 
-        // GET: api/[controller]/userCheck/userCode/userPass
-        [HttpGet("userCheck/{userCode}/{userPass}")]
-        public virtual async Task<ActionResult<ApiResult<UserTable>>> UserCheck([FromRoute] string userCode, [FromRoute] string userPass)
+        // POST: api/[controller]/userCheck
+        [HttpPost("userCheck")]
+        public virtual async Task<ActionResult<ApiResult<UserTable>>> UserCheck([FromBody] UserTable userTable)
         {
-            this._logger.LogInformation($"[userCheck/{userCode}/{userPass}] [{this._ip}]");
-            var entities = await this._business.GetBy("UserCode", userCode, "UserPass", userPass, this._ip).ConfigureAwait(false);
+            this._logger.LogInformation($"[userCheck/{userTable.UserCode}/{userTable.UserPass}] [{this._ip}]");
+            var entities = await this._business.GetBy("UserCode", userTable.UserCode, "UserPass", userTable.UserPass, this._ip).ConfigureAwait(false);
             if (entities?.Count > 0)
             {
                 return Ok(new ApiResult<UserTable>(true, 0, null));
             }
-            entities = await this._business.GetBy("UserCode", userCode, this._ip).ConfigureAwait(false);
+            entities = await this._business.GetBy("UserCode", userTable.UserCode, this._ip).ConfigureAwait(false);
             if (entities?.Count > 0)
             {
                 return Ok(new ApiResult<UserTable>(false, 3, new ErrorResult(404, "UserPass Error!")));
