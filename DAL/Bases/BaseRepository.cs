@@ -47,7 +47,7 @@ namespace DAL.Bases
         public async Task<List<TEntity>> DeleteRange(List<TEntity> entities)
         {
             var entitiesFound = await this._context.Set<TEntity>().AsNoTracking().AsAsyncEnumerable()
-                .Where(e => Array.IndexOf(entities.Select(t => t.GetKeyProperty()).ToArray(), Convert.ToInt64(e.GetKeyProperty())) > -1)
+                .Where(e => Array.IndexOf(entities.Select(t => t.GetKeyProperty()).ToArray(), e.GetKeyProperty().ToString()) > -1)
                 .ToListAsync().ConfigureAwait(false);
             if (entitiesFound == null || entitiesFound?.Count() == 0)
             {
@@ -95,7 +95,7 @@ namespace DAL.Bases
 
         public async Task<TEntity> Update(TEntity entity)
         {
-            var entityFound = await this._context.Set<TEntity>().FindAsync(Convert.ToInt64(entity.GetKeyProperty())).ConfigureAwait(false);
+            var entityFound = await this._context.Set<TEntity>().FindAsync(entity.GetKeyProperty().ToString()).ConfigureAwait(false);
             if (entityFound == null)
             {
                 return null;
