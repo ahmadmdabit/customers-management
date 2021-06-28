@@ -46,7 +46,19 @@
     <main class="flex-shrink-0">
         <div class="container">
 
-            <a class="btn btn-success" href="javascript:showModal()">Yeni Ekle</a>
+            <div class="btn-group" role="group" aria-label="Basic outlined example">
+                <button type="button" class="btn btn-success" onclick="showModal()">Yeni Ekle</button>
+            </div>
+            <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                <input id="filter-value" type="text" class="form-control" placeholder="Filter" style=" border-top-right-radius: 0;
+                            border-bottom-right-radius: 0;">
+                <select id="filter-by" class="form-select" style="border-radius: 0;">
+                    <option selected value="CustomerCode">Code</option>
+                    <option value="CustomerName">Name</option>
+                    <option value="CustomerCity">City</option>
+                </select>
+                <button type="button" class="btn btn-warning" onclick="filter()">Uygula</button>
+            </div>
 
             <div id="customers"></div>
 
@@ -65,14 +77,14 @@
     <script src="/assets/vendors/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="/assets/vendors/tabulator/js/tabulator.min.js"></script>
     <script>
-        var config;
+        var config, table, tableData;
         $(function () {
             $('#userCode').text(Cookies.get('uc'));
             $.get('/config.json', function (res) {
                 config = res
 
                 // Loading data
-                var table = new Tabulator("#customers", {
+                table = new Tabulator("#customers", {
                     ajaxURL: config.apiBaseUrl + 'api/customerTable/byUser/' + Cookies.get('uc'), //ajax URL
                     ajaxConfig: "GET", //ajax HTTP request type
                     ajaxContentType: "json", // send parameters to the server as a JSON encoded string
@@ -81,7 +93,8 @@
                         //params - the parameters passed with the request
                         //response - the JSON object returned in the body of the response.
 
-                        return response.data; //return the tableData property of a response json object
+                        tableData = response.data; //return the tableData property of a response json object
+                        return tableData;
                     },
                     height: 470, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
                     layout: "fitColumns", //fit columns to width of table (optional)
@@ -165,48 +178,75 @@
                 cancelButtonText: `Vazgeç`,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        type: "POST",
-                        url: config.apiBaseUrl + 'api/customerTable/customerProcess',
-                        data: JSON.stringify({ 
-                            "Customer": customer, 
-                            "type": type, 
-                            "Filter": null,
-                        }),
-                        success: function (res) {
-                            if (res.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'İşlem Başarılı',
-                                    // text: 'Giriş Yapldı',
-                                    // footer: '<a href="">Why do I have this issue?</a>'
-                                });
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 2000);
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'HATA!',
-                                    text: res.error.errorMessage,
-                                    // footer: '<a href="">Why do I have this issue?</a>'
-                                });
-                            }
-                        },
-                        error: function (e) {
-                            console.error(e);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'HATA!',
-                                text: 'Lütfen konsolu açın.',
-                                // footer: '<a href="">Why do I have this issue?</a>'
-                            });
-                        },
-                        dataType: "json",
-                        contentType: "application/json"
-                    });
+                    process(customer, type, null, true);
                 }
             });
+        }
+
+        function process(customer, type, filter, hardReload) {
+            $.ajax({
+                type: "POST",
+                url: config.apiBaseUrl + 'api/customerTable/customerProcess',
+                data: JSON.stringify({
+                    "UserCode": Cookies.get('uc'),
+                    "Customer": customer,
+                    "type": type,
+                    "Filter": filter,
+                }),
+                success: function (res) {
+                    if (res.success) {
+                        if (hardReload) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'İşlem Başarılı',
+                                // text: 'Giriş Yapldı',
+                                // footer: '<a href="">Why do I have this issue?</a>'
+                            });
+                                
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                        else {
+                            table.setData(res.data);
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'HATA!',
+                            text: res.error.errorMessage,
+                            // footer: '<a href="">Why do I have this issue?</a>'
+                        });
+                    }
+                },
+                error: function (e) {
+                    console.error(e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'HATA!',
+                        text: 'Lütfen konsolu açın.',
+                        // footer: '<a href="">Why do I have this issue?</a>'
+                    });
+                },
+                dataType: "json",
+                contentType: "application/json"
+            });
+        }
+
+        function filter() {
+            var val = $('#filter-value').val();
+            if (val == null || val == "") {
+                table.setData(tableData);
+                return;
+            }
+            var customer = {
+                "CustomerCode": "",
+                "CustomerName": "",
+                "CustomerCity": "",
+            };
+            customer[$('#filter-by').val()] = val;
+
+            process(customer, 3, $('#filter-by').val(), false);
         }
 
         function signout() {
