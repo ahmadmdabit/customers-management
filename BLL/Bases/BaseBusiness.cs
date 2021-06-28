@@ -1,12 +1,10 @@
-﻿using DAL.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Common.Extensions;
+﻿using BLL.Interfaces;
+using DAL.Bases;
+using DAL.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using BLL.Interfaces;
-using DAL.Bases;
 
 namespace BLL.Bases
 {

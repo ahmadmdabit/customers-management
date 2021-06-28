@@ -1,13 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Common.Attributes;
+using DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Common.Attributes;
-using DAL.Bases;
-using DAL.Interfaces;
 
 namespace DAL.Bases
 {
@@ -24,7 +23,6 @@ namespace DAL.Bases
 
         public async Task<TEntity> Add(TEntity entity)
         {
-            //entity.CreatedDate = DateTime.Now;
             this._context.Set<TEntity>().Add(entity);
             await this._context.SaveChangesAsync().ConfigureAwait(false);
             return entity;
@@ -70,10 +68,6 @@ namespace DAL.Bases
             IQueryable<TEntity> dbSet = IncludeBuild();
             return await dbSet.AsNoTracking().AsAsyncEnumerable()
                 .FirstOrDefaultAsync(x => x.GetKeyProperty().ToString() == id).ConfigureAwait(false);
-
-            //var entityFound = await this._context.Set<TEntity>().FindAsync(id).ConfigureAwait(false);
-            //this._context.Entry(entityFound).State = EntityState.Detached;
-            //return entityFound;
         }
 
         public async Task<List<TEntity>> GetAll()
